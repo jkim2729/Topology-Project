@@ -1,14 +1,23 @@
 # -*- coding: utf-8 -*-
 
 
-matrix_lists = [[0,2,-2,1,0,0],[-2,0,2,0,1,0],[2,-2,0,0,0,1]]
-new_list_1 = [[0,-2,2,-1,0,0],[2,0,-2,0,1,0],[-2,2,0,2,0,1]]
-new_list_2 = [[0,-2,2,1,2,0],[2,0,-2,0,-1,0],[-2,2,0,0,0,1]]
-new_list_3 = [[0,-2,2,1,0,0],[2,0,-2,0,1,2],[-2,2,0,0,0,-1]]
-new_list_1_2 =[[0,2,-2,-1,0,0],[-2,0,2,0,-1,0],[2,-2,0,2,2,1]]
-new_list_1_3 =[[0,2,-2,3,0,2],[-2,0,2,0,1,0],[2,-2,0,-2,0,-1]]
+import copy
+
+original_matrix = [[0,2,-2,1,0,0],[-2,0,2,0,1,0],[2,-2,0,0,0,1]]
+
 def quiver_mutation(matrix_lists,mutated_node):
-    list_copy = matrix_lists.copy()
+    """
+    Creates new matrix to represent quiver after mutation
+    
+    Args:
+        matrix_lists: a matrix of the original quiver (list)
+        mutated_node: the node being mutated (int)
+    
+    returns: a matrix list that represents the new quiver after mutation
+    
+    """
+    
+    list_copy = copy.deepcopy(matrix_lists)
     if mutated_node == 1:
         for i in range(6):
             if list_copy[0][i]>0 and i<3:
@@ -25,7 +34,8 @@ def quiver_mutation(matrix_lists,mutated_node):
                         list_copy[j][i]+= list_copy[0][i]*list_copy[0][j]   
                     elif list_copy[0][j]>0 and j>=3: #case where new arrows are between one main node and one prime
                         list_copy[i][j]+= -1*list_copy[0][i]*list_copy[0][j]
-        list_copy[0] = [element * -1 for element in list_copy[0]]
+        for i in range(len(list_copy[0])):
+            list_copy[0][i]*=-1
         list_copy[1][0]*=-1
         list_copy[2][0]*=-1
                     
@@ -46,7 +56,9 @@ def quiver_mutation(matrix_lists,mutated_node):
                         list_copy[j][i]+= list_copy[1][i]*list_copy[1][j]   
                     elif list_copy[1][j]>0 and j>=3: #case where new arrows are between one main node and one prime
                         list_copy[i][j]+= -1*list_copy[1][i]*list_copy[1][j]
-        list_copy[1] = [element * -1 for element in list_copy[1]]
+        for i in range(len(list_copy[1])):
+            list_copy[1][i]*=-1
+            
         list_copy[0][1]*=-1
         list_copy[2][1]*=-1
 
@@ -67,16 +79,55 @@ def quiver_mutation(matrix_lists,mutated_node):
                         list_copy[j][i]+= list_copy[2][i]*list_copy[2][j]   
                     elif list_copy[2][j]>0 and j>=3: #case where new arrows are between one main node and one prime
                         list_copy[i][j]+= -1*list_copy[2][i]*list_copy[2][j]
-        list_copy[2] = [element * -1 for element in list_copy[2]]
+        for i in range(len(list_copy[2])):
+            list_copy[2][i]*=-1
+            
         list_copy[1][2]*=-1
         list_copy[0][2]*=-1
 
-    return matrix_lists
-z = matrix_lists.copy()
-x =  quiver_mutation(z,1)
-w = x.copy()
+    return list_copy
+def quiver_mutation_repeated(original_matrix,mutated_nodes):
+    """
+    Creates new matrix to represent quiver after several mutations
+    
+    Args:
+        matrix_lists: a matrix of the original quiver (list)
+        mutated_node: a list of nodes being mutated with first element being first mutation and so on (list)
+    
+    returns: a matrix list that represents the new quiver after mutations
+    
+    """
+    if not mutated_nodes:
+        return original_matrix
+    list_copy = copy.deepcopy(original_matrix)
+    mutated_quiver = quiver_mutation(list_copy, mutated_nodes[0])
+    if len(mutated_nodes)>1:
+        for i in range(1,len(mutated_nodes)):
+            mutated_quiver = quiver_mutation(mutated_quiver, mutated_nodes[i])
+    return mutated_quiver
+quiver_map ={(1,):tuple(('r_1',)),(2,):tuple(('r_2',)),(3,):tuple(('r_3',))}
 
-y = quiver_mutation(w, 2)
+def quiver_mutation_reflections(matrix,mutated_nodes,i):
+    nodes_copy = copy.deepcopy(mutated_nodes)
+    map_tuple = tuple([i])+tuple(nodes_copy)
+    if map_tuple in quiver_map:
+        
+        return quiver_map[map_tuple]
+    else:
+        k = nodes_copy.pop()
+        w = quiver_mutation_repeated(original_matrix, nodes_copy)
+        b = w[i-1][k-1]
+        c = w[k-1][3:6]
+        if (min(c)>=0 and sum(c)>0 and b>0) or (min(c)<=0 and sum(c)<0 and b<0):
+            r_i = quiver_mutation_reflections(w,nodes_copy,k)+quiver_mutation_reflections(w,nodes_copy,i) \
+            +quiver_mutation_reflections(w,nodes_copy,k)
+
+        else:
+            r_i = quiver_mutation_reflections(w,nodes_copy,i)
+        
+        return r_i
+
+
 k = y.copy()
 h = quiver_mutation(k,3)
 print(h)
