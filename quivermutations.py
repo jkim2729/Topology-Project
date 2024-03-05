@@ -139,10 +139,18 @@ def quiver_mutation_reflections(matrix,mutated_nodes,i):
 
         else:
             r_i = quiver_mutation_reflections(w,nodes_copy,i)
-        
-        return r_i
+        r_i_list = list(r_i)
+        counter = 0
+        while counter<(len(r_i_list)-1):
+            try:
+                if r_i_list[counter]==r_i_list[counter+1]:
+                    r_i_list.pop(counter)
+                    r_i_list.pop(counter)
+                else:
+                    counter+=1
+            except IndexError:
+                break
+        return tuple(r_i_list)
 
 
-k = y.copy()
-h = quiver_mutation(k,3)
-print(h)
+
