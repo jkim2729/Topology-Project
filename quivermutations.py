@@ -108,6 +108,21 @@ def quiver_mutation_repeated(original_matrix,mutated_nodes):
 quiver_map ={(1,):tuple(('r_1',)),(2,):tuple(('r_2',)),(3,):tuple(('r_3',))}
 
 def quiver_mutation_reflections(matrix,mutated_nodes,i):
+    """
+    Creates new matrix to represent quiver after several mutations
+    
+    Args:
+        matrix: the w[k] matrix, find this using quiver_mutation_repeated function (list)
+        mutated_node: a list of nodes being mutated with first element being first mutation and so on (list)
+        i: the edge we are reflecting about (int)
+        
+    
+    returns: a tuple of r's 
+    
+    Example Input: quiver_mutation_reflections(quiver_mutation_repeated(original_matrix,[1,2,3]),[1,2,3],1)
+    Example Output: ('r_1',)
+    
+    """
     nodes_copy = copy.deepcopy(mutated_nodes)
     map_tuple = tuple([i])+tuple(nodes_copy)
     if map_tuple in quiver_map:
